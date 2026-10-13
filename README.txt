@@ -1,9 +1,6 @@
-Olly graphics patch - changed files only (copy over your lib/ folders).
+Olly graphics patch v2 - changed/new files only (copy over your lib/ folders).
 
-lib/TimerEngine/gauge_render.cpp/.h   gauge rewritten; new drawEditableTime()
-lib/MenuModule/MenuModule.cpp         counter, scrollbar, taller highlight (descenders)
-lib/DisplayModule/DisplayModule.cpp   12h AM/PM badge no longer clipped
-lib/TimerModule/TimerModule.cpp       uses drawEditableTime
-lib/SetTimeModule/SetTimeModule.cpp   uses drawEditableTime, hints shortened
-lib/ExerciseReminderModule/...cpp     hints shortened (were wider than the screen)
-lib/PomodoroModule/PomodoroModule.cpp PAUSED shown in the caption slot
+NEW  lib/UiKit/UiKit.h   drawHint(): thin rule + 5x7 footer. Vocabulary: Turn / Press / Tap.
+Home strip: plain AM/PM text beside the minutes.
+Footer hints on: Timer, Set Time, Exercise, Brightness, Stopwatch, Quotes/Jokes, RPS, Coin, Dice.
+Plus earlier fixes: gauge rewrite, menu counter/scrollbar, edit-field highlight.

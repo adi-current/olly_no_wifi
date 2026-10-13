@@ -1,4 +1,5 @@
 #include "FunModule.h"
+#include "UiKit.h"
 #include "quotes.h"
 #include "jokes.h"
 #include <esp_system.h> // esp_random() - hardware RNG, no seeding needed
@@ -66,14 +67,14 @@ void FunModule::render() {
 
   if (currentType == FunType::MOTIVATION) {
     renderWrapped(QUOTES[currentQuoteIndex], 12, 11, 124);
-    display->drawStr(2, 62, "(tap for another)");
+    drawHint(display, "Tap: Another");
   } else {
     if (!punchlineRevealed) {
       renderWrapped(JOKES[currentJokeIndex].setup, 12, 11, 124);
-      display->drawStr(2, 62, "(tap for punchline)");
+      drawHint(display, "Tap: Punchline");
     } else {
       renderWrapped(JOKES[currentJokeIndex].punchline, 12, 11, 124);
-      display->drawStr(2, 62, "(tap for next joke)");
+      drawHint(display, "Tap: Next joke");
     }
   }
 }
@@ -90,7 +91,7 @@ void FunModule::renderWrapped(const char* text, int startY, int lineHeight, int 
   while (word != nullptr) {
     String candidate = (line.length() == 0) ? String(word) : (line + " " + word);
     if (display->getStrWidth(candidate.c_str()) > maxWidth && line.length() > 0) {
-      display->drawStr(2, y, line.c_str());
+      if (y < UI_HINT_TOP - 2) display->drawStr(2, y, line.c_str()); // never draw into the footer
       y += lineHeight;
       line = word;
     } else {
@@ -98,7 +99,7 @@ void FunModule::renderWrapped(const char* text, int startY, int lineHeight, int 
     }
     word = strtok(nullptr, " ");
   }
-  if (line.length() > 0) {
+  if (line.length() > 0 && y < UI_HINT_TOP - 2) {
     display->drawStr(2, y, line.c_str());
   }
 }

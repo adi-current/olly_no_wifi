@@ -1,5 +1,6 @@
 #include "SetTimeModule.h"
 #include "gauge_render.h"
+#include "UiKit.h"
 
 void SetTimeModule::begin(U8G2* d, RtcModule* r) {
   display = d;
@@ -65,9 +66,6 @@ void SetTimeModule::render() {
 
   drawEditableTime(display, 42, hourBuf, minBuf, state == State::EDIT_HOUR ? 1 : 2);
 
-  display->setFont(u8g2_font_6x10_tr);
-  const char* hint = (state == State::EDIT_HOUR) ? "Turn:hour  Knob:next"
-                                                  : "Turn:min  Knob:save";
-  int hintW = display->getStrWidth(hint);
-  display->drawStr((128 - hintW) / 2, 60, hint);
+  if (state == State::EDIT_HOUR) drawHint(display, "Turn: Hour", "Press: Next");
+  else                           drawHint(display, "Turn: Min",  "Press: Save");
 }

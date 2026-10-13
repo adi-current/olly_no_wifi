@@ -1,4 +1,5 @@
 #include "ExerciseReminderModule.h"
+#include "UiKit.h"
 #include "BuzzerModule.h"
 
 extern BuzzerModule buzzer; // defined in main.cpp
@@ -119,10 +120,6 @@ void ExerciseReminderModule::renderSettingsScreen(U8G2* display) {
   int iw = display->getStrWidth(intervalBuf);
   display->drawStr((128 - iw) / 2, 44, intervalBuf);
 
-  display->setFont(u8g2_font_6x10_tr);
-  const char* hint = (settingsState == SettingsState::VIEW)
-    ? "Tap:on/off  Knob:set"
-    : "Turn:adjust Knob:save";
-  int hw = display->getStrWidth(hint);
-  display->drawStr((128 - hw) / 2, 60, hint);
+  if (settingsState == SettingsState::VIEW) drawHint(display, "Tap: On/Off",  "Press: Edit");
+  else                                      drawHint(display, "Turn: Adjust", "Press: Save");
 }

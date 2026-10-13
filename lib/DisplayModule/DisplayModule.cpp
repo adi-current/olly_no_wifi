@@ -61,8 +61,8 @@ bool DisplayModule::update(int rotationDelta, bool confirmPressed, bool backPres
     // face bitmap, since strip + face exactly fill 128px).
     //
     // Both formats now share the same stacked layout: hour (with trailing
-    // ':') on top, minute below. 12h mode additionally gets the AM/PM
-    // circle badge next to the minutes - 24h has no AM/PM to show, so
+    // ':') on top, minute below. 12h mode additionally gets small AM/PM
+    // text next to the minutes - 24h has no AM/PM to show, so
     // that part is skipped there.
     uint8_t displayHour = timeHour;
     if (!use24Hour) {
@@ -89,28 +89,22 @@ bool DisplayModule::update(int rotationDelta, bool confirmPressed, bool backPres
       if (minX < 0) minX = 0;
       display.drawStr(minX, minY, minBuf);
     } else {
-      const char* ampm = (timeHour < 12) ? "A" : "P";
+      const char* ampm = (timeHour < 12) ? "AM" : "PM";
 
-      // Minute + AM/PM badge are centered together as one unit so the
-      // pair doesn't look off-balance within the strip.
-      const int badgeD = 11; // diameter of the AM/PM circle badge (odd = true centre pixel; 12 + cy 59 ran off the bottom of the screen)
-      const int badgeGap = 2; // gap between the minute digits and the badge
-      int minW = display.getStrWidth(minBuf);
-      int totalW = minW + badgeGap + badgeD;
-      int startX = (STRIP_WIDTH - totalW) / 2 - 1;
+      // Minutes + small plain "AM"/"PM" text, centred together as one unit.
+      // (Replaces the circled A/P badge: a lone letter was ambiguous and the
+      // filled disc was the heaviest shape in the strip.) The text shares the
+      // minute digits' baseline so the pair reads as one line.
+      const int ampmGap = 3;
+      int minW = display.getStrWidth(minBuf);       // minute font is still active
+      display.setFont(u8g2_font_5x7_tr);
+      int ampmW = display.getStrWidth(ampm);
+      int startX = (STRIP_WIDTH - (minW + ampmGap + ampmW)) / 2 - 1;
       if (startX < 0) startX = 0;
 
+      display.drawStr(startX + minW + ampmGap, minY, ampm);
+      display.setFont(u8g2_font_7x13B_tr);
       display.drawStr(startX, minY, minBuf);
-
-      int badgeCx = startX + minW + badgeGap + badgeD / 2;
-      int badgeCy = minY - 5; // rows 53-63: sits exactly on the minute digits, fully on-screen
-      display.setDrawColor(1);
-      display.drawDisc(badgeCx, badgeCy, badgeD / 2);
-      display.setFont(u8g2_font_helvB08_tr); // bold - thicker strokes so A/P read clearly at this size
-      display.setDrawColor(0); // punch the letter out of the filled badge
-      int ampmW = display.getStrWidth(ampm);
-      display.drawStr(badgeCx - ampmW / 2, badgeCy + 3, ampm);
-      display.setDrawColor(1); // restore for everything drawn after this
     }
 
     // --- Face: border + eyes are now procedural (FaceModule) ---

@@ -1,4 +1,5 @@
 #include "GamesModule.h"
+#include "UiKit.h"
 #include "rps_bitmaps.h"
 #include "coin_bitmaps.h"
 #include "dice_bitmaps.h"
@@ -128,9 +129,7 @@ void GamesModule::renderRPS() {
     int lw = display->getStrWidth(nameLabel);
     display->drawStr((128 - lw) / 2, 48, nameLabel);
 
-    const char* hint = "Rotate, Tap=Pick";
-    int hw = display->getStrWidth(hint);
-    display->drawStr((128 - hw) / 2, 60, hint);
+    drawHint(display, "Turn: Choose", "Tap: Pick");
 
   } else if (rpsPhase == RpsPhase::REVEALING) {
     display->setFont(u8g2_font_7x13B_tr);
@@ -180,9 +179,10 @@ void GamesModule::renderRPS() {
 void GamesModule::renderCoin() {
   if (instantPhase == InstantPhase::PROMPT) {
     display->setFont(u8g2_font_7x13B_tr);
-    const char* msg = "Tap to flip";
+    const char* msg = "Coin Toss";
     int w = display->getStrWidth(msg);
-    display->drawStr((128 - w) / 2, 36, msg);
+    display->drawStr((128 - w) / 2, 32, msg);
+    drawHint(display, "Tap: Flip");
     return;
   }
 
@@ -206,9 +206,10 @@ void GamesModule::renderCoin() {
 void GamesModule::renderDice() {
   if (instantPhase == InstantPhase::PROMPT) {
     display->setFont(u8g2_font_7x13B_tr);
-    const char* msg = "Tap to roll";
+    const char* msg = "Dice Roll";
     int w = display->getStrWidth(msg);
-    display->drawStr((128 - w) / 2, 36, msg);
+    display->drawStr((128 - w) / 2, 32, msg);
+    drawHint(display, "Tap: Roll");
     return;
   }
 

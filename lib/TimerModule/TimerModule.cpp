@@ -1,4 +1,5 @@
 #include "TimerModule.h"
+#include "UiKit.h"
 #include "gauge_render.h"
 #include "BuzzerModule.h"
 
@@ -125,10 +126,7 @@ void TimerModule::render() {
   drawEditableTime(display, 40, minBuf, secBuf,
                    state == State::EDIT_MINUTES ? 1 : state == State::EDIT_SECONDS ? 2 : 0);
 
-  display->setFont(u8g2_font_6x10_tr);
-  const char* hint = (state == State::IDLE) ? "Tap:Start  Knob:Edit"
-                     : (state == State::EDIT_MINUTES) ? "Rotate  Knob:Next"
-                                                        : "Rotate  Knob:Save";
-  int hw = display->getStrWidth(hint);
-  display->drawStr((128 - hw) / 2, 58, hint);
+  if (state == State::IDLE)               drawHint(display, "Tap: Start", "Press: Edit");
+  else if (state == State::EDIT_MINUTES)  drawHint(display, "Turn: Min",  "Press: Next");
+  else                                    drawHint(display, "Turn: Sec",  "Press: Save");
 }

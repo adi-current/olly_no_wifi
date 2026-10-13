@@ -1,4 +1,5 @@
 #include "StopwatchModule.h"
+#include "UiKit.h"
 
 void StopwatchModule::begin(U8G2* d) {
   display = d;
@@ -48,11 +49,5 @@ void StopwatchModule::render() {
   int w = display->getStrWidth(buf);
   display->drawStr((128 - w) / 2, 40, buf);
 
-  display->setFont(u8g2_font_6x10_tr);
-  const char* hint;
-  if (!everStarted) hint = "Tap to start";
-  else if (engine.isRunning()) hint = "Tap to pause";
-  else hint = "Tap to resume";
-  int hw = display->getStrWidth(hint);
-  display->drawStr((128 - hw) / 2, 58, hint);
+  drawHint(display, !everStarted ? "Tap: Start" : engine.isRunning() ? "Tap: Pause" : "Tap: Resume");
 }

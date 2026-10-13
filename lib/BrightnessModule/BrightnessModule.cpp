@@ -1,4 +1,5 @@
 #include "BrightnessModule.h"
+#include "UiKit.h"
 
 void BrightnessModule::begin(U8G2* d, DisplayModule* dm) {
   display = d;
@@ -60,8 +61,5 @@ void BrightnessModule::render() {
     display->drawBox(barX + 1, barY + 1, fillW, barH - 2);
   }
 
-  display->setFont(u8g2_font_6x10_tr);
-  const char* hint = "Rotate, Knob=Save";
-  int hw = display->getStrWidth(hint);
-  display->drawStr((128 - hw) / 2, 60, hint);
+  drawHint(display, "Turn: Adjust", "Press: Save");
 }
