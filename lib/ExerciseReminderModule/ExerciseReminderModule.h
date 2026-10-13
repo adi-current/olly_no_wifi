@@ -10,20 +10,22 @@
 // checkAndClearFired() reports when it's time to briefly interrupt the
 // screen with a reminder message (renderInterrupt()).
 //
-// Selecting "Exercise Reminder" from the menu now opens a small dedicated
-// screen instead of toggling instantly - same idea as TimerModule's
-// IDLE/EDIT flow: a short touch arms/disarms it, an encoder click opens
-// interval editing (rotate to adjust, click to confirm+save).
+// Settings screen - one screen, no hidden edit mode, same grammar as
+// Brightness:
+//   Turn        pick an interval preset (live preview, nothing committed yet)
+//   Press       Start / Apply (different interval) / Stop (same interval) - the
+//               footer always spells out which
+//   Tap         unused on this screen (one control, one job)
+//   Long touch  back; the selection was only a preview, so nothing to undo
 //
-// ASSUMPTION: armed/disarmed state is still NOT persisted - resets to
-// disarmed on every reboot, unlike the interval (which now is). Easy to
-// add later with the same Preferences technique used here if you want it
-// to stick across power cycles too.
+// Both the interval AND the armed state are saved, so a power cut no longer
+// silently turns the reminder off. (After a reboot the countdown restarts
+// from the full interval - a small inaccuracy, but better than silence.)
 class ExerciseReminderModule {
   public:
     void begin();
 
-    void toggleArmed(); // flips armed/disarmed using the current interval
+    void toggleArmed(); // stop if running, else start with the current interval
     bool isArmed() const;
 
     void update(); // call every loop(), regardless of what else is on screen
@@ -34,12 +36,9 @@ class ExerciseReminderModule {
 
     void renderInterrupt(U8G2* display); // the brief full-screen reminder message
 
-    // --- Settings screen: view armed state + edit the interval ---
-    void start(); // call when selected from the menu - resets to the view screen
+    // --- Settings screen ---
+    void start(); // call when selected from the menu - cursor starts on the current interval
 
-    // touchShort toggles armed/disarmed. encoderClick (while viewing) opens
-    // interval editing; (while editing) confirms+saves and returns to
-    // viewing. touchLong always exits back to the menu, from either state.
     // Returns true once it's time to hand control back to the menu.
     bool updateSettingsScreen(int rotationDelta, bool encoderClick, bool touchShort, bool touchLong);
 
@@ -52,14 +51,11 @@ class ExerciseReminderModule {
     TimerEngine engine;
     bool fired = false;
 
-    uint16_t intervalMinutes = 60; // default 60 min, persisted via NVS once changed
+    uint16_t intervalMinutes = 60; // the interval actually running / last committed
+    uint8_t selIndex = 3;          // settings-screen cursor into PRESETS (preview only)
     Preferences prefs;
-    void saveInterval();
 
-    enum class SettingsState { VIEW, EDIT_INTERVAL };
-    SettingsState settingsState = SettingsState::VIEW;
-
-    static const uint16_t MIN_INTERVAL_MINUTES = 5;
-    static const uint16_t MAX_INTERVAL_MINUTES = 240; // 4 hours
-    static const int INTERVAL_STEP_MINUTES = 5;
+    void saveSettings();                    // one flash write: interval + armed
+    void startReminder(uint16_t minutes);   // commit interval, arm, restart countdown
+    void stopReminder();
 };
