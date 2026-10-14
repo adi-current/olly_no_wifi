@@ -19,3 +19,6 @@ v4: input grammar + hint footer across every screen
  - Games + quotes/jokes: Press is the action; Coin result = Press again (no auto-exit)
  - Interrupt: Press dismisses
  - main.cpp (NEW in patch): beeps only in the menu; screens beep for presses they use
+
+v5: games, coin, dice, quotes and jokes use touch Tap (Hold = back); Press stays for menus/settings.
+ RPS shows turn arrows in the picture so Tap keeps the left footer slot everywhere.

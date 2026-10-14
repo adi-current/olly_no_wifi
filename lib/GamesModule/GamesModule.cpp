@@ -97,7 +97,7 @@ bool GamesModule::update(int rotationDelta, bool actionPressed, bool backPressed
         return false;
 
       case InstantPhase::RESULT:
-        // Coin Toss and Dice Roll now behave the same: Press goes again, and
+        // Coin Toss and Dice Roll now behave the same: Tap goes again, and
         // only Hold leaves. (Coin used to leave on a tap or after 3 seconds,
         // so the same gesture did different things after a result.)
         if (actionPressed) {
@@ -129,7 +129,12 @@ void GamesModule::renderRPS() {
     int lw = display->getStrWidth(nameLabel);
     display->drawStr((128 - lw) / 2, 48, nameLabel);
 
-    drawHint(display, "Turn: Choose", "Press: Pick");
+    // Turn cue lives in the picture (same arrows as the Exercise dial), so the
+    // footer keeps Tap on the left like every other touch screen.
+    const int arrowY = 2 + RPS_ICON_HEIGHT / 2;
+    display->drawTriangle(14, arrowY, 21, arrowY - 5, 21, arrowY + 5);
+    display->drawTriangle(113, arrowY, 106, arrowY - 5, 106, arrowY + 5);
+    drawHint(display, "Tap: Pick");
 
   } else if (rpsPhase == RpsPhase::REVEALING) {
     display->setFont(u8g2_font_7x13B_tr);
@@ -174,7 +179,7 @@ void GamesModule::renderRPS() {
     display->setFont(u8g2_font_7x13B_tr);
     int w = display->getStrWidth(resultText);
     display->drawStr((128 - w) / 2, 50, resultText);
-    drawHint(display, nullptr, "Press: Again");
+    drawHint(display, "Tap: Again");
   }
 }
 
@@ -184,7 +189,7 @@ void GamesModule::renderCoin() {
     const char* msg = "Coin Toss";
     int w = display->getStrWidth(msg);
     display->drawStr((128 - w) / 2, 32, msg);
-    drawHint(display, nullptr, "Press: Flip");
+    drawHint(display, "Tap: Flip");
     return;
   }
 
@@ -205,7 +210,7 @@ void GamesModule::renderCoin() {
   int lw = display->getStrWidth(label);
   int zoneCentre = (x + COIN_HEADS_WIDTH + 128) / 2;
   display->drawStr(zoneCentre - lw / 2, y + COIN_HEADS_HEIGHT / 2 + 4, label);
-  if (instantPhase == InstantPhase::RESULT) drawHint(display, nullptr, "Press: Again");
+  if (instantPhase == InstantPhase::RESULT) drawHint(display, "Tap: Again");
 }
 
 void GamesModule::renderDice() {
@@ -214,7 +219,7 @@ void GamesModule::renderDice() {
     const char* msg = "Dice Roll";
     int w = display->getStrWidth(msg);
     display->drawStr((128 - w) / 2, 32, msg);
-    drawHint(display, nullptr, "Press: Roll");
+    drawHint(display, "Tap: Roll");
     return;
   }
 

@@ -10,13 +10,16 @@
 //
 // Controls, and what each one always means:
 //   Turn  = choose / change a value
-//   Press = go forward: confirm, next, roll, commit
-//   Tap   = run control for clocks only: start / pause / resume
+//   Press = go forward in menus and settings: confirm, next, save
+//   Tap   = the action on play and content screens: start / pause / resume,
+//           flip, roll, pick, next quote or joke
 //   Hold  = back / cancel (not shown in the footer)
 //
 // Fixed slots, so you always know where to look:
-//   LEFT  = Turn or Tap (whichever the screen uses)
+//   LEFT  = Turn or Tap (whichever the screen uses; Tap is always left)
 //   RIGHT = Press - right-aligned even when it is the only hint
+//   (A screen that turns AND taps shows a turn cue in the picture itself,
+//   e.g. the arrows on Rock Paper Scissors, so Tap keeps the left slot.)
 //
 // Usage:  drawHint(d, "Turn: Min", "Press: Save");   // both slots
 //         drawHint(d, "Tap: Pause");                  // left only

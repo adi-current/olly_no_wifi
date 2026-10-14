@@ -11,7 +11,7 @@ enum class GameType { ROCK_PAPER_SCISSORS, COIN_TOSS, DICE_ROLL };
 //
 // Input signals match the project-wide convention used everywhere else:
 //   rotationDelta  -> browse/cycle (only RPS uses this, to cycle the pick)
-//   actionPressed  -> encoder PRESS (confirm a pick / trigger a toss/roll / go again)
+//   actionPressed  -> touch TAP (confirm a pick / trigger a toss/roll / go again)
 //   backPressed    -> touch long press (always exits back to the menu)
 class GamesModule {
   public:
@@ -43,7 +43,7 @@ class GamesModule {
     static const unsigned long RPS_REVEAL_MS = 500;   // suspense beat before showing the result
 
     // --- Coin Toss / Dice Roll share the same Prompt -> Spin -> Result skeleton ---
-    // Coin Toss and Dice Roll: Result never auto-returns - a press goes again
+    // Coin Toss and Dice Roll: Result never auto-returns - a tap goes again
     // (back to Spinning) and only a long-press (Hold, see update()) exits.
     enum class InstantPhase { PROMPT, SPINNING, RESULT };
     InstantPhase instantPhase = InstantPhase::PROMPT;

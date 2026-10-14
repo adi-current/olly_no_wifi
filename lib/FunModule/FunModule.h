@@ -14,7 +14,7 @@ class FunModule {
     // Call once when the user selects this feature from the menu.
     void start(FunType type);
 
-    // actionPressed (encoder PRESS - go forward) behavior:
+    // actionPressed (touch TAP) behavior:
     //   Motivation -> shows a new random quote
     //   Joke, setup showing    -> reveals the punchline
     //   Joke, punchline showing -> picks a new random joke

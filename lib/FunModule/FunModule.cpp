@@ -71,14 +71,14 @@ void FunModule::render() {
 
   if (currentType == FunType::MOTIVATION) {
     renderWrapped(QUOTES[currentQuoteIndex], 12, 11, 124);
-    drawHint(display, nullptr, "Press: Another");
+    drawHint(display, "Tap: Another");
   } else {
     if (!punchlineRevealed) {
       renderWrapped(JOKES[currentJokeIndex].setup, 12, 11, 124);
-      drawHint(display, nullptr, "Press: Punchline");
+      drawHint(display, "Tap: Punchline");
     } else {
       renderWrapped(JOKES[currentJokeIndex].punchline, 12, 11, 124);
-      drawHint(display, nullptr, "Press: Next joke");
+      drawHint(display, "Tap: Next joke");
     }
   }
 }

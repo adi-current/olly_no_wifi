@@ -85,8 +85,8 @@ void loop() {
   buzzer.update(); // must run every loop() so timed beeps stop themselves
 
   int rotation = encoder.takeRotation();
-  bool confirm = encoder.wasClicked();     // Press = go forward: confirm / next / roll / commit
-  bool actionShort = touch.wasPressed();   // Tap = run control for clocks only: start / pause / resume
+  bool confirm = encoder.wasClicked();     // Press = go forward in menus and settings: confirm / next / save
+  bool actionShort = touch.wasPressed();   // Tap = the action on play and content screens: start/pause/resume, flip, roll, pick, next
   bool backLong = touch.wasLongPressed();  // Hold = back / cancel, everywhere
 
   // Only the menu beeps here. Every other screen plays its own feedback when
@@ -156,7 +156,7 @@ void loop() {
     }
 
   } else if (appMode == AppMode::GAME_ACTIVE) {
-    bool done = games.update(rotation, confirm, backLong);
+    bool done = games.update(rotation, actionShort, backLong);
     U8G2* raw = display.getRawDisplay();
     raw->clearBuffer();
     games.render();
@@ -164,7 +164,7 @@ void loop() {
     if (done) appMode = AppMode::HOME_MENU;
 
   } else if (appMode == AppMode::FUN_ACTIVE) {
-    bool done = fun.update(rotation, confirm, backLong);
+    bool done = fun.update(rotation, actionShort, backLong);
     U8G2* raw = display.getRawDisplay();
     raw->clearBuffer();
     fun.render();
