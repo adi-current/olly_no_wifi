@@ -1,4 +1,7 @@
 #include "SetTimeModule.h"
+#include "BuzzerModule.h"
+
+extern BuzzerModule buzzer; // defined in main.cpp
 #include "gauge_render.h"
 #include "UiKit.h"
 
@@ -27,6 +30,7 @@ bool SetTimeModule::update(int rotationDelta, bool encoderClick, bool touchLong)
         editHour = (uint8_t)v;
       }
       if (encoderClick) {
+        buzzer.beepClick();
         state = State::EDIT_MINUTE;
       }
       return false;
@@ -38,6 +42,7 @@ bool SetTimeModule::update(int rotationDelta, bool encoderClick, bool touchLong)
         editMinute = (uint8_t)v;
       }
       if (encoderClick) {
+        buzzer.beepSuccess();
         if (rtc) {
           RtcTime t = baseTime; // keeps date/dayOfWeek/month/year unchanged
           t.hour = editHour;

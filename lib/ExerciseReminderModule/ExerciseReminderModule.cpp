@@ -93,6 +93,7 @@ void ExerciseReminderModule::renderInterrupt(U8G2* display) {
   const char* sub = "Take a quick break";
   int sw = display->getStrWidth(sub);
   display->drawStr((128 - sw) / 2, 46, sub);
+  drawHint(display, nullptr, "Press: Done");
 }
 
 void ExerciseReminderModule::start() {

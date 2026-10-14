@@ -12,8 +12,9 @@
 // distinct inputs (not just touch), per the explicit design:
 //   encoder rotate -> adjust the currently-active field (minutes/seconds)
 //   encoder click  -> cycle IDLE -> edit minutes -> edit seconds -> (save+)IDLE
-//   touch short    -> start (from IDLE) / stop (from RUNNING) / dismiss (from COMPLETE)
-//   touch long     -> back to menu, always, from any state
+//   touch short    -> start (from IDLE) / pause <-> resume (RUNNING/PAUSED), same as Pomodoro and Stopwatch
+//   encoder click  -> also dismisses COMPLETE
+//   touch long     -> back to menu (cancels a running timer), always, from any state
 class TimerModule {
   public:
     void begin(U8G2* display);
@@ -31,7 +32,7 @@ class TimerModule {
     TimerEngine engine;
     Preferences prefs;
 
-    enum class State { IDLE, EDIT_MINUTES, EDIT_SECONDS, RUNNING, COMPLETE };
+    enum class State { IDLE, EDIT_MINUTES, EDIT_SECONDS, RUNNING, PAUSED, COMPLETE };
     State state = State::IDLE;
 
     uint16_t setMinutes = 10; // default the very first time, before anything's ever been saved

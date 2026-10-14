@@ -25,7 +25,7 @@ static void drawArc(U8G2* d, float r, float fromDeg, float toDeg) {
   }
 }
 
-void drawTimerGauge(U8G2* d, float fractionRemaining, const char* timeText, const char* label, int totalMinutes) {
+void drawTimerGauge(U8G2* d, float fractionRemaining, const char* timeText, const char* label, int totalMinutes, const char* status) {
   if (fractionRemaining < 0) fractionRemaining = 0;
   if (fractionRemaining > 1) fractionRemaining = 1;
 
@@ -62,13 +62,13 @@ void drawTimerGauge(U8G2* d, float fractionRemaining, const char* timeText, cons
   // (the old text baseline was at the pivot's height, so the digits, needle
   // and pivot all overprinted each other).
   d->setFont(u8g2_font_ncenB14_tr);
-  d->drawStr((128 - d->getStrWidth(timeText)) / 2, 53, timeText);
+  d->drawStr((128 - d->getStrWidth(timeText)) / 2, 51, timeText); // clear of the hint footer (row 54+)
 
-  // Phase caption on the bottom row
-  if (label && label[0] != '\0') {
-    d->setFont(u8g2_font_6x10_tr);
-    d->drawStr((128 - d->getStrWidth(label)) / 2, 63, label);
-  }
+  // Corners are free (the arc never reaches them): what this is, top-left;
+  // its state (e.g. PAUSED), top-right. The bottom row belongs to the footer.
+  d->setFont(u8g2_font_5x7_tr);
+  if (label  && label[0]  != '\0') d->drawStr(2, 8, label);
+  if (status && status[0] != '\0') d->drawStr(126 - d->getStrWidth(status), 8, status);
 }
 
 void drawEditableTime(U8G2* d, int baselineY, const char* left, const char* right, int highlight) {

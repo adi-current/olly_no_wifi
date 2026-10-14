@@ -14,11 +14,11 @@ class FunModule {
     // Call once when the user selects this feature from the menu.
     void start(FunType type);
 
-    // actionPressed (touch short press) behavior:
+    // actionPressed (encoder PRESS - go forward) behavior:
     //   Motivation -> shows a new random quote
     //   Joke, setup showing    -> reveals the punchline
     //   Joke, punchline showing -> picks a new random joke
-    // backPressed (touch long press) always exits to the menu.
+    // backPressed (touch long press = Hold) always exits to the menu.
     bool update(int rotationDelta, bool actionPressed, bool backPressed);
 
     void render();

@@ -1,5 +1,6 @@
 #include "PomodoroModule.h"
 #include "gauge_render.h"
+#include "UiKit.h"
 #include "BuzzerModule.h"
 
 extern BuzzerModule buzzer; // defined in main.cpp
@@ -69,6 +70,7 @@ void PomodoroModule::render() {
   snprintf(timeStr, sizeof(timeStr), "%02lu:%02lu", (unsigned long)(remaining / 60), (unsigned long)(remaining % 60));
 
   int totalMinutes = (int)(total / 60);
-  drawTimerGauge(display, frac, timeStr, engine.isPaused() ? "PAUSED" : phaseLabel(), totalMinutes);
+  drawTimerGauge(display, frac, timeStr, phaseLabel(), totalMinutes, engine.isPaused() ? "PAUSED" : nullptr);
+  drawHint(display, engine.isPaused() ? "Tap: Resume" : "Tap: Pause");
 
 }

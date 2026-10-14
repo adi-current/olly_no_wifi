@@ -1,5 +1,8 @@
 #include "GamesModule.h"
 #include "UiKit.h"
+#include "BuzzerModule.h"
+
+extern BuzzerModule buzzer; // defined in main.cpp
 #include "rps_bitmaps.h"
 #include "coin_bitmaps.h"
 #include "dice_bitmaps.h"
@@ -42,6 +45,7 @@ bool GamesModule::update(int rotationDelta, bool actionPressed, bool backPressed
           playerChoice = (Choice)idx;
         }
         if (actionPressed) {
+          buzzer.beepClick();
           rpsPhase = RpsPhase::REVEALING;
           rpsPhaseStartMs = now;
         }
@@ -59,6 +63,7 @@ bool GamesModule::update(int rotationDelta, bool actionPressed, bool backPressed
         // Never auto-returns - a tap starts a new round instead of exiting.
         // Only backPressed (handled at the top of this function) exits.
         if (actionPressed) {
+          buzzer.beepClick();
           rpsPhase = RpsPhase::PICKING;
         }
         return false;
@@ -68,6 +73,7 @@ bool GamesModule::update(int rotationDelta, bool actionPressed, bool backPressed
     switch (instantPhase) {
       case InstantPhase::PROMPT:
         if (actionPressed) {
+          buzzer.beepClick();
           instantPhase = InstantPhase::SPINNING;
           instantPhaseStartMs = now;
           spinDisplayFrame = 0;
@@ -91,21 +97,15 @@ bool GamesModule::update(int rotationDelta, bool actionPressed, bool backPressed
         return false;
 
       case InstantPhase::RESULT:
-        if (currentGame == GameType::DICE_ROLL) {
-          // Dice Roll never auto-returns - a tap re-rolls instead of exiting.
-          // Only backPressed (handled at the top of this function) exits.
-          if (actionPressed) {
-            instantPhase = InstantPhase::SPINNING;
-            instantPhaseStartMs = now;
-          }
-          return false;
-        } else {
-          // Coin Toss: a tap or the timeout both end it, back to the menu.
-          if (actionPressed || now - instantPhaseStartMs >= RESULT_MS) {
-            return true;
-          }
-          return false;
+        // Coin Toss and Dice Roll now behave the same: Press goes again, and
+        // only Hold leaves. (Coin used to leave on a tap or after 3 seconds,
+        // so the same gesture did different things after a result.)
+        if (actionPressed) {
+          buzzer.beepClick();
+          instantPhase = InstantPhase::SPINNING;
+          instantPhaseStartMs = now;
         }
+        return false;
     }
   }
   return false;
@@ -129,7 +129,7 @@ void GamesModule::renderRPS() {
     int lw = display->getStrWidth(nameLabel);
     display->drawStr((128 - lw) / 2, 48, nameLabel);
 
-    drawHint(display, "Turn: Choose", "Tap: Pick");
+    drawHint(display, "Turn: Choose", "Press: Pick");
 
   } else if (rpsPhase == RpsPhase::REVEALING) {
     display->setFont(u8g2_font_7x13B_tr);
@@ -142,23 +142,24 @@ void GamesModule::renderRPS() {
     // (facing left, normal set) - so the two hands face each other rather
     // than both pointing the same way.
     int gap = 8;
+    const int iconY = 2;
     int totalW = RPS_ICON_WIDTH + gap + RPS_ICON_WIDTH;
     int x0 = (128 - totalW) / 2;
     int ollyX = x0;
     int playerX = x0 + RPS_ICON_WIDTH + gap;
 
-    display->drawXBMP(ollyX, 0, RPS_ICON_WIDTH, RPS_ICON_HEIGHT, OLLY_RPS_BMPS[(int)ollyChoice]);
-    display->drawXBMP(playerX, 0, RPS_ICON_WIDTH, RPS_ICON_HEIGHT, PLAYER_RPS_BMPS[(int)playerChoice]);
+    display->drawXBMP(ollyX, iconY, RPS_ICON_WIDTH, RPS_ICON_HEIGHT, OLLY_RPS_BMPS[(int)ollyChoice]);
+    display->drawXBMP(playerX, iconY, RPS_ICON_WIDTH, RPS_ICON_HEIGHT, PLAYER_RPS_BMPS[(int)playerChoice]);
 
     // "OLLY"/"YOU" labels establish which side is which - right is always you
     display->setFont(u8g2_font_5x7_tr);
     const char* ollyLabel = "OLLY";
     int olw = display->getStrWidth(ollyLabel);
-    display->drawStr(ollyX + (RPS_ICON_WIDTH - olw) / 2, 46, ollyLabel);
+    // Labels sit BESIDE the hands (not under them) to leave room for the footer
+    display->drawStr(ollyX - 3 - olw, iconY + RPS_ICON_HEIGHT / 2 + 3, ollyLabel);
 
     const char* youLabel = "YOU";
-    int ylw = display->getStrWidth(youLabel);
-    display->drawStr(playerX + (RPS_ICON_WIDTH - ylw) / 2, 46, youLabel);
+    display->drawStr(playerX + RPS_ICON_WIDTH + 3, iconY + RPS_ICON_HEIGHT / 2 + 3, youLabel);
 
     const char* resultText;
     if (playerChoice == ollyChoice) {
@@ -172,7 +173,8 @@ void GamesModule::renderRPS() {
     }
     display->setFont(u8g2_font_7x13B_tr);
     int w = display->getStrWidth(resultText);
-    display->drawStr((128 - w) / 2, 60, resultText);
+    display->drawStr((128 - w) / 2, 50, resultText);
+    drawHint(display, nullptr, "Press: Again");
   }
 }
 
@@ -182,7 +184,7 @@ void GamesModule::renderCoin() {
     const char* msg = "Coin Toss";
     int w = display->getStrWidth(msg);
     display->drawStr((128 - w) / 2, 32, msg);
-    drawHint(display, "Tap: Flip");
+    drawHint(display, nullptr, "Press: Flip");
     return;
   }
 
@@ -192,7 +194,8 @@ void GamesModule::renderCoin() {
                       ? (spinDisplayFrame == 0)
                       : coinIsHeads;
 
-  int x = (128 - COIN_HEADS_WIDTH) / 2;
+  // Coin on the left, its label in the space to the right, so the footer fits
+  int x = 22;
   int y = 2;
   display->drawXBMP(x, y, COIN_HEADS_WIDTH, COIN_HEADS_HEIGHT,
                      showHeads ? coin_heads_bmp : coin_tails_bmp);
@@ -200,7 +203,9 @@ void GamesModule::renderCoin() {
   display->setFont(u8g2_font_6x10_tr);
   const char* label = showHeads ? "HEADS" : "TAILS";
   int lw = display->getStrWidth(label);
-  display->drawStr((128 - lw) / 2, y + COIN_HEADS_HEIGHT + 8, label);
+  int zoneCentre = (x + COIN_HEADS_WIDTH + 128) / 2;
+  display->drawStr(zoneCentre - lw / 2, y + COIN_HEADS_HEIGHT / 2 + 4, label);
+  if (instantPhase == InstantPhase::RESULT) drawHint(display, nullptr, "Press: Again");
 }
 
 void GamesModule::renderDice() {
@@ -209,7 +214,7 @@ void GamesModule::renderDice() {
     const char* msg = "Dice Roll";
     int w = display->getStrWidth(msg);
     display->drawStr((128 - w) / 2, 32, msg);
-    drawHint(display, "Tap: Roll");
+    drawHint(display, nullptr, "Press: Roll");
     return;
   }
 

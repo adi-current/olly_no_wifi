@@ -17,7 +17,7 @@
 // off-screen or overlaps another element (this replaced an earlier version
 // that had a mountain-silhouette decoration competing with the needle for
 // the same central space - dropped for a cleaner, better-balanced layout).
-void drawTimerGauge(U8G2* d, float fractionRemaining, const char* timeText, const char* label, int totalMinutes);
+void drawTimerGauge(U8G2* d, float fractionRemaining, const char* timeText, const char* label, int totalMinutes, const char* status = nullptr);
 
 // Big "LL:RR" editor line (Timer MM:SS, Set Time HH:MM). highlight: 0 = none,
 // 1 = left field inverted, 2 = right field inverted. The colon has its own

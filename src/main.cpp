@@ -85,11 +85,13 @@ void loop() {
   buzzer.update(); // must run every loop() so timed beeps stop themselves
 
   int rotation = encoder.takeRotation();
-  bool confirm = encoder.wasClicked();     // encoder click = forward/commit, everywhere (and TimerModule's edit-field cycling)
-  bool actionShort = touch.wasPressed();   // touch short press = feature-specific action
-  bool backLong = touch.wasLongPressed();  // touch long press = back one level, everywhere
+  bool confirm = encoder.wasClicked();     // Press = go forward: confirm / next / roll / commit
+  bool actionShort = touch.wasPressed();   // Tap = run control for clocks only: start / pause / resume
+  bool backLong = touch.wasLongPressed();  // Hold = back / cancel, everywhere
 
-  if (confirm) buzzer.beepClick();
+  // Only the menu beeps here. Every other screen plays its own feedback when
+  // (and only when) a press actually does something - a beep on a dead press lies.
+  if (confirm && appMode == AppMode::HOME_MENU) buzzer.beepClick();
 
   unsigned long now = millis();
   if (now - lastClockReadMs >= CLOCK_READ_INTERVAL_MS) {
@@ -154,7 +156,7 @@ void loop() {
     }
 
   } else if (appMode == AppMode::GAME_ACTIVE) {
-    bool done = games.update(rotation, actionShort, backLong);
+    bool done = games.update(rotation, confirm, backLong);
     U8G2* raw = display.getRawDisplay();
     raw->clearBuffer();
     games.render();
@@ -162,7 +164,7 @@ void loop() {
     if (done) appMode = AppMode::HOME_MENU;
 
   } else if (appMode == AppMode::FUN_ACTIVE) {
-    bool done = fun.update(rotation, actionShort, backLong);
+    bool done = fun.update(rotation, confirm, backLong);
     U8G2* raw = display.getRawDisplay();
     raw->clearBuffer();
     fun.render();
@@ -223,7 +225,7 @@ void loop() {
     exerciseReminder.renderInterrupt(raw);
     raw->sendBuffer();
 
-    if (actionShort || backLong || now - exerciseInterruptStartMs >= EXERCISE_INTERRUPT_MS) {
+    if (confirm || backLong || now - exerciseInterruptStartMs >= EXERCISE_INTERRUPT_MS) {
       appMode = AppMode::HOME_MENU;
     }
   }

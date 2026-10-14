@@ -1,5 +1,8 @@
 #include "FunModule.h"
 #include "UiKit.h"
+#include "BuzzerModule.h"
+
+extern BuzzerModule buzzer; // defined in main.cpp
 #include "quotes.h"
 #include "jokes.h"
 #include <esp_system.h> // esp_random() - hardware RNG, no seeding needed
@@ -44,6 +47,7 @@ void FunModule::start(FunType type) {
 
 bool FunModule::update(int rotationDelta, bool actionPressed, bool backPressed) {
   if (backPressed) return true; // universal back
+  if (actionPressed) buzzer.beepClick(); // feedback only when the press actually does something (it always does here)
 
   if (currentType == FunType::MOTIVATION) {
     if (actionPressed) {
@@ -67,14 +71,14 @@ void FunModule::render() {
 
   if (currentType == FunType::MOTIVATION) {
     renderWrapped(QUOTES[currentQuoteIndex], 12, 11, 124);
-    drawHint(display, "Tap: Another");
+    drawHint(display, nullptr, "Press: Another");
   } else {
     if (!punchlineRevealed) {
       renderWrapped(JOKES[currentJokeIndex].setup, 12, 11, 124);
-      drawHint(display, "Tap: Punchline");
+      drawHint(display, nullptr, "Press: Punchline");
     } else {
       renderWrapped(JOKES[currentJokeIndex].punchline, 12, 11, 124);
-      drawHint(display, "Tap: Next joke");
+      drawHint(display, nullptr, "Press: Next joke");
     }
   }
 }

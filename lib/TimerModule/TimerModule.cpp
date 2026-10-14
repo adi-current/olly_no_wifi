@@ -45,6 +45,7 @@ bool TimerModule::update(int rotationDelta, bool encoderClick, bool touchShort, 
         engine.start(totalSetSeconds());
         state = State::RUNNING;
       } else if (encoderClick) {
+        buzzer.beepClick();
         state = State::EDIT_MINUTES;
       }
       return false;
@@ -57,6 +58,7 @@ bool TimerModule::update(int rotationDelta, bool encoderClick, bool touchShort, 
         setMinutes = (uint16_t)v;
       }
       if (encoderClick) {
+        buzzer.beepClick();
         state = State::EDIT_SECONDS;
       }
       return false;
@@ -70,14 +72,15 @@ bool TimerModule::update(int rotationDelta, bool encoderClick, bool touchShort, 
       }
       if (encoderClick) {
         saveDuration(); // one flash write, only on confirm - not per tick
+        buzzer.beepSuccess();
         state = State::IDLE;
       }
       return false;
 
     case State::RUNNING:
       if (touchShort) {
-        engine.reset();
-        state = State::IDLE; // abort back to idle, same remembered duration ready to reuse
+        engine.pause(); // Tap is pause/resume on every running clock - it no longer throws progress away
+        state = State::PAUSED;
         return false;
       }
       if (engine.isFinished()) {
@@ -87,8 +90,16 @@ bool TimerModule::update(int rotationDelta, bool encoderClick, bool touchShort, 
       }
       return false;
 
+    case State::PAUSED:
+      if (touchShort) {
+        engine.resume();
+        state = State::RUNNING;
+      }
+      return false;
+
     case State::COMPLETE:
-      if (touchShort || millis() - completeShownAtMs >= COMPLETE_AUTO_RETURN_MS) {
+      if (encoderClick || millis() - completeShownAtMs >= COMPLETE_AUTO_RETURN_MS) {
+        if (encoderClick) buzzer.beepClick();
         state = State::IDLE;
       }
       return false;
@@ -99,14 +110,15 @@ bool TimerModule::update(int rotationDelta, bool encoderClick, bool touchShort, 
 void TimerModule::render() {
   if (!display) return;
 
-  if (state == State::RUNNING) {
+  if (state == State::RUNNING || state == State::PAUSED) {
     uint32_t remaining = engine.remainingSeconds();
     uint32_t total = totalSetSeconds();
     float frac = (total > 0) ? (float)remaining / (float)total : 0;
     char buf[6];
     snprintf(buf, sizeof(buf), "%02lu:%02lu", (unsigned long)(remaining / 60), (unsigned long)(remaining % 60));
     int totalMinutes = (int)(total / 60);
-    drawTimerGauge(display, frac, buf, "TIMER", totalMinutes);
+    drawTimerGauge(display, frac, buf, "TIMER", totalMinutes, state == State::PAUSED ? "PAUSED" : nullptr);
+    drawHint(display, state == State::PAUSED ? "Tap: Resume" : "Tap: Pause");
     return;
   }
 
@@ -114,7 +126,8 @@ void TimerModule::render() {
     display->setFont(u8g2_font_7x13B_tr);
     const char* msg = "TIME'S UP!";
     int w = display->getStrWidth(msg);
-    display->drawStr((128 - w) / 2, 36, msg);
+    display->drawStr((128 - w) / 2, 30, msg);
+    drawHint(display, nullptr, "Press: Done");
     return;
   }
 

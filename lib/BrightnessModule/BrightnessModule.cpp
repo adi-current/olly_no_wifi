@@ -1,4 +1,7 @@
 #include "BrightnessModule.h"
+#include "BuzzerModule.h"
+
+extern BuzzerModule buzzer; // defined in main.cpp
 #include "UiKit.h"
 
 void BrightnessModule::begin(U8G2* d, DisplayModule* dm) {
@@ -29,6 +32,7 @@ bool BrightnessModule::update(int rotationDelta, bool encoderClick, bool touchLo
   }
 
   if (encoderClick) {
+    buzzer.beepClick();
     if (displayModule) displayModule->commitBrightnessPercent(editPercent); // save to NVS
     return true;
   }
